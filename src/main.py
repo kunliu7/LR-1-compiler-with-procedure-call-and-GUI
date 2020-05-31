@@ -1,7 +1,7 @@
 ﻿# This Python file uses the following encoding: utf-8
 import sys
 #from PySide2.QtWidgets import QApplication, QMainWindow
-from myTest import *
+from LR1Compiler import *
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
@@ -42,23 +42,24 @@ class Ui_MainWindow(object):
         self.textCode.setObjectName("textCode")
         #self.textCode.setGeometry(QtCore.QRect(330, 60, 401, 401))
         label_rowIndex = QtWidgets.QLabel(index_codeWidget)
-        label_rowIndex.setText("\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29");
+        label_rowIndex.setText("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29");
         hhbox = QHBoxLayout()           #横向布局
         hhbox.addWidget(label_rowIndex)    #把行号加入布局
         hhbox.addWidget(self.textCode)    #把文本框加入布局
         index_codeWidget.setLayout(hhbox)
 
+        # 所有按钮的布局
         self.vboxcode = QVBoxLayout()
         self.vboxcode.addWidget(self.label_code)
         self.vboxcode.addWidget(index_codeWidget)
 
-        self.okButton = QPushButton(self.centralwidget)
-        self.okButton.setText('词法分析')
+        #self.okButton = QPushButton(self.centralwidget)
+        #self.okButton.setText('词法分析')
         #self.okButton.setSizePolicy(Fixed,Fixed);
 
         self.all4Button = QPushButton(self.centralwidget)
         self.all4Button.setText('语法分析+语义分析+中间代码生成')
-        self.all4Button.setEnabled(False)
+        self.all4Button.setEnabled(True)
 
         button4widget = QtWidgets.QWidget(MainWindow)
         button4widget.setObjectName("button4widget")
@@ -81,6 +82,9 @@ class Ui_MainWindow(object):
         self.SignButton.setText('符号表')
         self.SignButton.setEnabled(False)
 
+        self.objCodeButton = QPushButton(self.centralwidget)
+        self.objCodeButton.setText('目标代码生成')
+        self.objCodeButton.setEnabled(False)
 
         hhbox = QHBoxLayout()           #横向布局
         hhbox.addWidget(self.GramButton)    #把按钮加入布局
@@ -90,19 +94,21 @@ class Ui_MainWindow(object):
 
         button4widget.setLayout(hhbox)
 
-
         #self.gramButton.setSizePolicy(Fixed,Fixed);
-
-        self.vboxcode.addWidget(self.okButton)
+        # 将按钮添加至布局
+        #self.vboxcode.addWidget(self.okButton)
         self.vboxcode.addWidget(self.all4Button)
         self.vboxcode.addWidget(button4widget)
+        self.vboxcode.addWidget(self.objCodeButton)
 
-        self.okButton.clicked.connect(self.LexTest)
+        # 将按钮和信号关联
+        #self.okButton.clicked.connect(self.LexTest)
         self.all4Button.clicked.connect(self.GramTest)
         self.GramButton.clicked.connect(self.GramResTest)
         self.midCodeButton.clicked.connect(self.midResTest)
         self.FuncButton.clicked.connect(self.FuncResTest)
         self.SignButton.clicked.connect(self.SignResTest)
+        self.objCodeButton.clicked.connect(self.objCodeTest)
 
         self.centralwidget.setLayout(self.vboxcode)
 
@@ -113,17 +119,16 @@ class Ui_MainWindow(object):
 
         # 以上是GUI相关
         # 语法相关设置:
+        os.chdir(os.path.dirname(sys.argv[0])) # 将工作路径改为该文件目录
         self.cfg = CFG()
-        self.cfg.readGrammerFile('C:\\Users\\95223\\Documents\\Compiler_Principle\\bhw1\\copy\\test2\\grammer_middle.txt')
-        #import os
-        #print(os.getcwd()) #C:\\Users\\95223\\
-        #self.cfg.readGrammerFile('.\\grammer_middle.txt')
+        #self.cfg.readGrammerFile('C:\\Users\\95223\\Documents\\Compiling_Principle\\bhw1\\copy\\test2\\grammer_middle.txt')
+        self.cfg.readGrammerFile('.\\grammer_final.txt')
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
-
+    # 语法分析+语义分析+中间代码生成
     def GramTest(self):
         self.cfg.getDotItems()
         self.cfg.calFirstSet()
@@ -131,7 +136,8 @@ class Ui_MainWindow(object):
         self.family.buildFamily()
         self.ana = SyntacticAnalyzer(self.cfg, self.family)  # 'S'不需要，要结束符#
         self.ana.getTables2()
-        self.ana.isRecognizable2(self.tokens)
+        self.originCode = self.textCode.toPlainText()
+        self.ana.isRecognizable2(self.originCode)
 
         # 以下是执行isRecognizable2后的结果
         '''
@@ -154,9 +160,10 @@ class Ui_MainWindow(object):
                                             QMessageBox.Yes)
             return
         else:
+            self.ana.saveMidCodeToFile()
             ErrorDialog = QMessageBox.information(self.MainWindow,
                                             "成功！",
-                                            '语法分析和语义分析成功！请点击按钮查看中间代码、函数表、符号表',
+                                            '语法分析和语义分析成功！请点击按钮查看中间代码、函数表、符号表\n中间代码已写入文件middleCodeFile.txt',
                                             QMessageBox.Yes)
 
         # 语法分析成功后结果
@@ -166,6 +173,7 @@ class Ui_MainWindow(object):
         self.midCodeButton.setEnabled(True)
         self.FuncButton.setEnabled(True)
         self.SignButton.setEnabled(True)
+        self.objCodeButton.setEnabled(True)
         # TODO: pxn，按下“语法分析”的按钮后，这三张表的按钮由灰变可选，点击后能查看以下三张表
         # 注：原先在点击'语法分析'按钮的时候，会直接弹出结果，现在变成点击按钮式的
         # 语义分析和中间代码生成成功后结果：
@@ -181,6 +189,7 @@ class Ui_MainWindow(object):
 
         # -------------- 以上是程序相关 ---------------------------------
 
+    # 展示符号表分析结果
     def SignResTest(self):
         # -------------- 以下是GUI相关 ---------------------------------
        # print(self.ana.funcTable)
@@ -226,6 +235,8 @@ class Ui_MainWindow(object):
         hhbox.addWidget(table)    #把表格加入布局
         GramDialog.setLayout(hhbox)
         GramDialog.show()
+    
+    # 展示函数表分析结果
     def FuncResTest(self):
         # -------------- 以下是GUI相关 ---------------------------------
        # print(self.ana.funcTable)
@@ -250,6 +261,7 @@ class Ui_MainWindow(object):
         #table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         #table.setItem(0,0,QTableWidgetItem("111"))
         cnt_row=0
+        print(len(self.ana.funcTable))
         for dir in self.ana.funcTable:
 
             cnt_col=0;
@@ -273,7 +285,7 @@ class Ui_MainWindow(object):
         GramDialog.setLayout(hhbox)
         GramDialog.show()
 
-
+    # 展示中间代码
     def midResTest(self):
         # -------------- 以下是GUI相关 ---------------------------------
 
@@ -317,7 +329,7 @@ class Ui_MainWindow(object):
         GramDialog.setLayout(hhbox)
         GramDialog.show()
 
-
+    # 展示语法分析结果
     def GramResTest(self):
         # -------------- 以下是GUI相关 ---------------------------------
 
@@ -370,13 +382,12 @@ class Ui_MainWindow(object):
         GramDialog.setLayout(hhbox)
         GramDialog.show()
 
-
-
-
+    # 词法分析
     def LexTest(self):
         inputProgram = self.textCode.toPlainText()
+        self.originCode = inputProgram
         self.tokens = self.cfg.genTokensFromInputBox(inputProgram)  # GUI!!!!!
-
+        #self.originCode
         # 以上是程序相关 ---------------------------------
         # 以下是GUI相关 ---------------------------------
         self.all4Button.setEnabled(True)
@@ -426,10 +437,50 @@ class Ui_MainWindow(object):
 
         LexDialog.show()
 
+    # 目标代码生成
+    def objCodeTest(self):
+        #self.getOriginCode()
+        self.ocg = ObjectCodeGenerator(self.ana.middleCode, self.ana.symbolTable)
+        self.ocg.genMips()
+        self.mipsText = ''
+        for code in self.ocg.mipsCode:
+            self.mipsText += code + '\n'
+        objCodeFile = open("objCodeFile.txt", "w+")
+        objCodeFile.write(self.mipsText)
+        objCodeFile.close()
+        ErrorDialog = QMessageBox.information(self.MainWindow,
+                                            "成功！",
+                                            '目标代码生成成功！请点击OK查看目标代码\n目标代码已写入文件objCodeFile.txt',
+                                            QMessageBox.Yes)
+        codeDialog = QDialog(self.MainWindow)
+        codeDialog.resize(900,600)
+        hhbox = QHBoxLayout()
+        objCodeTextBox = QTextEdit(codeDialog)
+        #objCodeTextBox.setSizePolicy()
+        hhbox.addWidget(objCodeTextBox)
+        codeDialog.setLayout(hhbox)
+        objCodeTextBox.setText(self.mipsText)
+        codeDialog.show()
+        return
+
+    def getOriginCode(self):
+        code = ''
+        regNum = 26 - 7
+        for i in range(regNum):
+            c = chr(ord('a') + i) 
+            code += 'int ' + c + ';\n'
+        for i in range(regNum):
+            c = chr(ord('a') + i) 
+            code += c + '=' + str(i) + ';\n'
+        print(code)
+        sys.stdout.flush()
+        return
+            
 
 
 
 if __name__ == "__main__":
+    #print('?')
     '''
     cfg = CFG()
     cfg.readGrammerFile('C:/Users/95223/Documents/Compiler_Principle/bhw1/copy/test2/grammer_final.txt')

@@ -1,0 +1,69 @@
+addiu $sp, $zero, 0x10018000
+or $fp, $sp, $zero
+jal  main
+jal  programEnd
+
+f1:
+lw $7, 0($fp)
+lw $8, 4($fp)
+lw $9, 8($fp)
+sub $fp,$fp,12
+add $10,$zero,0
+add $11,$8,$9
+sgt $12,$7,$11
+bgt $12,$zero,l1
+j l2
+l1:
+mul $13,$8,$9
+add $14,$13,1
+add $15,$7,$14
+add $16,$zero,$15
+j l3
+l2:
+add $16,$zero,$7
+l3:
+l6:
+bgt $17,$zero,l4
+j l5
+l4:
+add $a2,$zero,2
+mul $18,$16,$a2
+add $10,$zero,$18
+j l6
+l5:
+add $v0,$zero,$10
+jr $ra
+
+f2:
+lw $19, 0($fp)
+sub $fp,$fp,4
+add $20,$19,2
+add $19,$zero,$20
+add $a2,$zero,2
+mul $21,$19,$a2
+add $v0,$zero,$21
+jr $ra
+main:
+add $22,$zero,3
+add $23,$zero,4
+add $24,$zero,2
+sub $sp,$sp,4
+sw $ra, 0($sp)
+sub $sp,$sp,4
+sw $ra, 0($sp)
+add $fp,$fp,4
+sw $24, 0($fp)
+jal  f2
+lw $ra, 0($sp)
+add $sp,$sp,4
+add $25,$zero,$v0
+add $fp,$fp,12
+sw $22, 0($fp)
+sw $23, 4($fp)
+sw $25, 8($fp)
+jal  f1
+lw $ra, 0($sp)
+add $sp,$sp,4
+add $7,$zero,$v0
+add $22,$zero,$7
+jr $ra

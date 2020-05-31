@@ -37,3 +37,93 @@ void main(void)
 	a=program(a,b,demo(c));
 	return ;
 }
+
+int main(void)
+{
+	int a;
+int b;
+int c;
+int d;
+int e;
+int f;
+int g;
+int h;
+int i;
+int j;
+int k;
+int l;
+int m;
+int n;
+int o;
+int p;
+int q;
+int r;
+int s;
+
+int t;
+int u;
+a=0;
+b=1;
+c=2;
+d=3;
+e=4;
+f=5;
+g=6;
+h=7;
+i=8;
+j=9;
+k=10;
+l=11;
+m=12;
+n=13;
+o=14;
+p=15;
+q=16;
+r=17;
+s=18;
+	
+	
+	t = 19;
+	u = 20;
+	
+	a=0;
+b=1;
+c=2;
+d=3;
+e=4;
+f=5;
+g=6;
+h=7;
+i=8;
+j=9;
+k=10;
+l=11;
+m=12;
+n=13;
+o=14;
+p=15;
+q=16;
+r=17;
+s=18;
+t=19;
+
+	return 1;
+}
+
+
+// test function call
+int demo(int a, int b)
+{
+	return a;
+}
+ 
+void main(void)
+{
+	int a;
+	int b;
+	int c;
+	a = 999;
+	b = 111;
+	c=demo(a, b);
+	return ;
+}
